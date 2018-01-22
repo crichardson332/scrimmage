@@ -76,7 +76,7 @@ bool FixedWing6DOF::init(std::map<std::string, std::string> &info,
                           std::map<std::string, std::string> &params) {
     x_.resize(MODEL_NUM_ITEMS);
     Eigen::Vector3d &pos = state_->pos();
-    quat_world_ = state_->quat();
+    //quat_world_ = state_->quat();
 
     min_velocity_ = sc::get("min_velocity", params, 15.0);
     max_velocity_ = sc::get("max_velocity", params, 40.0);
@@ -100,10 +100,14 @@ bool FixedWing6DOF::init(std::map<std::string, std::string> &info,
     x_[Zw] = pos(2);
 
     // Initial Local orientation (no rotation)
-    x_[q0] = 1;
-    x_[q1] = 0;
-    x_[q2] = 0;
-    x_[q3] = 0;
+    //x_[q0] = 1;
+    //x_[q1] = 0;
+    //x_[q2] = 0;
+    //x_[q3] = 0;
+    x_[q0] = state_->quat().w();
+    x_[q1] = state_->quat().x();
+    x_[q2] = state_->quat().y();
+    x_[q3] = state_->quat().z();
 
     // Parse XML parameters
     g_ = sc::get<double>("gravity_magnitude", params, 9.81);
@@ -151,7 +155,7 @@ bool FixedWing6DOF::init(std::map<std::string, std::string> &info,
                     "U_dot", "V_dot", "W_dot",
                     "P_dot", "Q_dot", "R_dot",
                     "roll", "pitch", "yaw",
-                    "w_1", "w_2", "w_3", "w_4"});
+                    "thrust", "elevator", "aileron", "rudder"});
     }
 
     return true;
@@ -161,6 +165,10 @@ bool FixedWing6DOF::step(double time, double dt) {
     ctrl_u_ = std::static_pointer_cast<Controller>(parent_->controllers().back())->u();
 
     // TODO: Saturate inputs
+    x_[q0] = state_->quat().w();
+    x_[q1] = state_->quat().x();
+    x_[q2] = state_->quat().y();
+    x_[q3] = state_->quat().z();
 
     x_[Uw] = state_->vel()(0);
     x_[Vw] = state_->vel()(1);
@@ -177,13 +185,19 @@ bool FixedWing6DOF::step(double time, double dt) {
     Eigen::Vector3d prev_linear_vel(x_[U], x_[V], x_[W]);
     Eigen::Vector3d prev_angular_vel(x_[P], x_[Q], x_[R]);
 
+    // Apply any external forces
+    //force_ext_body_ = quat_local_.rotate_reverse(ext_force_);
+    //ext_force_ = Eigen::Vector3d::Zero(); // reset ext_force_ member variable
+    force_ext_body_ = state_->quat().rotate_reverse(ext_force_);
+    ext_force_ = Eigen::Vector3d::Zero(); // reset ext_force_ member variable
+
     ode_step(dt);
 
     // Calculate change in velocity to populate acceleration elements
     Eigen::Vector3d linear_vel(x_[U], x_[V], x_[W]);
     Eigen::Vector3d angular_vel(x_[P], x_[Q], x_[R]);
-    Eigen::Vector3d linear_acc = linear_vel - prev_linear_vel;
-    Eigen::Vector3d angular_acc = angular_vel - prev_angular_vel;
+    Eigen::Vector3d linear_acc = (linear_vel - prev_linear_vel) / dt;
+    Eigen::Vector3d angular_acc = (angular_vel - prev_angular_vel) / dt;
     x_[U_dot] = linear_acc(0);
     x_[V_dot] = linear_acc(1);
     x_[W_dot] = linear_acc(2);
@@ -191,20 +205,30 @@ bool FixedWing6DOF::step(double time, double dt) {
     x_[Q_dot] = angular_acc(1);
     x_[R_dot] = angular_acc(2);
 
-    // Normalize quaternion
-    quat_local_.w() = x_[q0];
-    quat_local_.x() = x_[q1];
-    quat_local_.y() = x_[q2];
-    quat_local_.z() = x_[q3];
-    quat_local_.normalize();
+    // // Normalize quaternion
+    // quat_local_.w() = x_[q0];
+    // quat_local_.x() = x_[q1];
+    // quat_local_.y() = x_[q2];
+    // quat_local_.z() = x_[q3];
+    // quat_local_.normalize();
+    //
+    // x_[q0] = quat_local_.w();
+    // x_[q1] = quat_local_.x();
+    // x_[q2] = quat_local_.y();
+    // x_[q3] = quat_local_.z();
+    state_->quat().set(x_[q0], x_[q1], x_[q2], x_[q3]);
+    state_->quat().normalize();
 
-    x_[q0] = quat_local_.w();
-    x_[q1] = quat_local_.x();
-    x_[q2] = quat_local_.y();
-    x_[q3] = quat_local_.z();
+    //sc::Quaternion quat_temp(x_[q0], x_[q1], x_[q2], x_[q3]);
+    //quat_temp.normalize();
+    //x_[q0] = quat_temp.w();
+    //x_[q1] = quat_temp.x();
+    //x_[q2] = quat_temp.y();
+    //x_[q3] = quat_temp.z();
 
     // Convert local coordinates to world coordinates
-    state_->quat() = quat_world_ * quat_local_;
+    //state_->quat() = quat_world_ * quat_local_;
+    //state_->quat() = quat_temp;
     state_->pos() << x_[Xw], x_[Yw], x_[Zw];
     state_->vel() << x_[Uw], x_[Vw], x_[Ww];
 
@@ -230,25 +254,78 @@ bool FixedWing6DOF::step(double time, double dt) {
                 {"roll", state_->quat().roll()},
                 {"pitch", state_->quat().pitch()},
                 {"yaw", state_->quat().yaw()},
-                {"w_1", ctrl_u_(0)},
-                {"w_2", ctrl_u_(1)},
-                {"w_3", ctrl_u_(2)},
-                {"w_4", ctrl_u_(3)}});
+                {"thrust", ctrl_u_(0)},
+                {"elevator", ctrl_u_(1)},
+                {"aileron", ctrl_u_(2)},
+                {"rudder", ctrl_u_(3)}});
     }
 
     return true;
 }
 
 void FixedWing6DOF::model(const vector_t &x , vector_t &dxdt , double t) {
+
+    // TODO: Ixx in slug-ft^2, convert to metric
+    double b = 27.5; // wing span (ft)
+    double S = 260.0; // surface area of wing (ft^2)
+    double c = 10.8; // chord length (ft)
+
+    double CDo = 0.03;
+    double CDa = 0.3;
+
+    double C_L0 = 0.28;
+    double C_La = 3.45;
+    double C_LQ = 0.0; // todo, check in L_tic
+    double C_Lda = 0.72;
+    double C_Lde = 0.36;
+
+    double CMo = 0.0;
+    double CMq = -3.6;
+    double CMa = -0.38;
+    double CMda = -1.1;
+    double CMde = -0.5;
+
+    double CYb = -0.98;
+    double CYdr = 0.17;
+
+    double CLb = -0.12;
+    double CLp = -0.26;
+    double CLr = 0.14;
+    //double CLda = 0.08;
+    double CLdr = -0.105;
+
+    double CNb = 0.25;
+    double CNp = 0.022;
+    double CNr = -0.35;
+    double CNda = 0.06;
+    double CNdr = 0.032;
+
+    double rho = 1.2; // todo
+    double rudder_limit = 0.2618;
+    double aileron_limit = -0.5236;
+    double elevator_limit = 0.5236;
+
+    double alpha = atan2(x_[W], x_[U]); // angle of attack
+    double beta = atan2(x_[V], x_[U]); // sideslip
+    double V_tau = sqrt(pow(x_[U], 2) + pow(x_[V], 2) + pow(x_[W], 2)); // resultant velocity vector
+    double Q_dyn_press = 0.5 * rho * pow(V_tau, 2); // dynamic pressure
+
+    double alpha_dot = 0.0; // TODO
+    double delta_elevator = 0.0; // todo
+    double delta_Ve = 0.0;
+
+    double VtauVe = pow((V_tau + delta_Ve)/V_tau, 2);
+    double pVtS = rho * pow(V_tau, 2) * S / 2.0;
+    double L_tic = (C_L0 + C_La*alpha + C_LQ*Q_dyn_press * c / (2*V_tau) + C_Lda * alpha_dot * c / (2*V_tau) + C_Lde * delta_elevator * VtauVe) * pVtS;
+
     double thrust = ctrl_u_(THRUST);
     // double elevator = ctrl_u_(ELEVATOR);
     // double aileron = ctrl_u_(AILERON);
     // double rudder = ctrl_u_(RUDDER);
 
     // Calculate force from weight in body frame:
-    Eigen::Vector3d F_weight(-mass_*g_*sin(x_[R]),
-                             +mass_*g_*sin(x_[P])*cos(x_[R]),
-                             +mass_*g_*cos(x_[P])*cos(x_[R]));
+    Eigen::Vector3d gravity_vector(0, 0, -mass_*g_);
+    Eigen::Vector3d F_weight = state_->quat().rotate_reverse(gravity_vector);
 
     Eigen::Vector3d F_thrust(thrust, 0, 0);
     Eigen::Vector3d F_total = F_weight + F_thrust;
@@ -291,21 +368,20 @@ void FixedWing6DOF::model(const vector_t &x , vector_t &dxdt , double t) {
     quat.y() = x[q2];
     quat.z() = x[q3];
 
-    quat = quat_world_ * quat;
+    //quat = quat_world_ * quat;
     quat.normalize();
 
     // Convert local positions and velocities into global coordinates
-    Eigen::Matrix3d rot = quat.toRotationMatrix();
+    //Eigen::Matrix3d rot = quat.toRotationMatrix();
 
     Eigen::Vector3d vel_local(x[U], x[V], x[W]);
-    Eigen::Vector3d vel_world = rot * vel_local;
+    Eigen::Vector3d vel_world = quat.rotate(vel_local); // rot * vel_local;
     dxdt[Xw] = vel_world(0);
     dxdt[Yw] = vel_world(1);
     dxdt[Zw] = vel_world(2);
 
-    //// TODO: Should these be cached from previous run or should the current dxdt
     Eigen::Vector3d acc_local(dxdt[U], dxdt[V], dxdt[W]);
-    Eigen::Vector3d acc_world = rot * acc_local;
+    Eigen::Vector3d acc_world = quat.rotate(acc_local); // rot * acc_local;
     dxdt[Uw] = acc_world(0);
     dxdt[Vw] = acc_world(1);
     dxdt[Ww] = acc_world(2);

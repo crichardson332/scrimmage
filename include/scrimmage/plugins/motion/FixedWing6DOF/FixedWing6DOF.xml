@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="http://gtri.gatech.edu"?>
 <params>
   <library>FixedWing6DOF_plugin</library>
+  <write_csv>false</write_csv>
+  
   <min_velocity>0</min_velocity>
   <max_velocity>40</max_velocity>
   <max_roll>30</max_roll> <!-- degrees -->
@@ -9,12 +11,12 @@
   <gravity_magnitude>9.81</gravity_magnitude>
 
   <!-- Platform mass -->
-  <mass>1.2</mass>
+  <mass>546</mass>
 
   <inertia_matrix>
-    [ 0.0122 0.0000 0.0000 ]
-    [ 0.0000 0.0122 0.0000 ]
-    [ 0.0000 0.0000 0.0244 ]
+    [ 8090.0 0.00000 1300.00 ]
+    [ 0.0000 25900.0 0.00000 ]
+    [ 1300.0 0.0000  29200.0 ]
   </inertia_matrix>
   
 </params>

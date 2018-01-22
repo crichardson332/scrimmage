@@ -88,7 +88,8 @@ bool FixedWing6DOFControllerPID::step(double t, double dt) {
     vel_pid_.set_setpoint(desired_state_->vel()(0));
     double u_thrust = vel_pid_.step(dt, state_->vel().norm());
 
-    u_ << u_thrust, roll_error, pitch_error, 0;
+    // u_ << u_thrust, roll_error, pitch_error, 0;
+    u_ << 0, 0, 0, 0;
     return true;
 }
 } // namespace controller

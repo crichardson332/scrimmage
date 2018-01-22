@@ -103,8 +103,8 @@ class FixedWing6DOF : public scrimmage::MotionModel{
     double max_roll_;
     double max_pitch_;
 
-    scrimmage::Quaternion quat_world_;
-    scrimmage::Quaternion quat_local_;
+    //scrimmage::Quaternion quat_world_;
+    //scrimmage::Quaternion quat_local_;
 
     Eigen::Matrix3d I_;
     Eigen::Matrix3d I_inv_;
@@ -112,6 +112,8 @@ class FixedWing6DOF : public scrimmage::MotionModel{
     // Logging utility
     bool write_csv_;
     CSV csv_;
+
+    Eigen::Vector3d force_ext_body_;
 };
 } // namespace motion
 } // namespace scrimmage
