@@ -96,14 +96,19 @@ class Updater : public vtkCommand {
 
     enum class ViewMode {FOLLOW = 0, FREE, OFFSET, FPV};
 
+    Updater();
+
+#ifdef __APPLE__
+    void Execute(vtkObject *caller, unsigned long eventId, // NOLINT
+                 void * callData);
+#else
+    void Execute(vtkObject *caller, unsigned long vtkNotUsed(eventId), // NOLINT
+                 void * vtkNotUsed(callData));
+#endif
+
     static Updater *New() {
         return new Updater;
     }
-
-    Updater();
-
-    void Execute(vtkObject *caller, unsigned long vtkNotUsed(eventId), // NOLINT
-                 void * vtkNotUsed(callData));
 
     void enable_fps();
 

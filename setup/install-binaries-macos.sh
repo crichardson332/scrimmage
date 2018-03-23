@@ -59,9 +59,7 @@ EOF
 # Add new dependencies here.
 ###################################################################
 # Dependencies only for Ubuntu
-DEPS_DPKG=(
-    sudo
-    git
+DEPS_BREW=(
     cmake
     gcc
     build-essential
@@ -70,7 +68,6 @@ DEPS_DPKG=(
     libgeographic-dev
     libboost-thread-dev
     libboost-date-time-dev
-    libboost-graph-dev
     libboost-iostreams-dev
     libboost-program-options-dev
     libboost-regex-dev
@@ -84,7 +81,7 @@ DEPS_DPKG=(
 )
 
 if ( [ "$1" != "--external" ] ) && ( [ "$3" != "--external" ] ); then
-    DEPS_DPKG+=(
+    DEPS_BREW+=(
         ccache
         parallel
         libbullet-dev
@@ -100,12 +97,12 @@ fi
 PYTHON_VERSION="a"
 if [[ "$1" = "--python" ]]; then
     PYTHON_VERSION="$2"
-elif  [[ "$3" = "--python" ]]; then
-    PYTHON_VERSION="$4"
+elif  [[ "$2" = "-python" ]]; then
+    PYTHON_VERSION="$3"
 fi 
 
 if [[ "$PYTHON_VERSION" = "2" ]] || [[ "$PYTHON_VERSION" = "a" ]]; then
-    DEPS_DPKG+=(
+    DEPS_BREW+=(
         python
         python-setuptools
         python-numpy
@@ -120,7 +117,7 @@ if [[ "$PYTHON_VERSION" = "2" ]] || [[ "$PYTHON_VERSION" = "a" ]]; then
 fi
 
 if [[ "$PYTHON_VERSION" -eq "3" ]] || [[ "$PYTHON_VERSION" = "a" ]]; then 
-    DEPS_DPKG+=(
+    DEPS_BREW+=(
         python3
         python3-setuptools
         python3-numpy
@@ -133,37 +130,16 @@ if [[ "$PYTHON_VERSION" -eq "3" ]] || [[ "$PYTHON_VERSION" = "a" ]]; then
 fi
 
 #Require the script to be run as root
-if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "This script must be run as root because libraries will be installed."
+if [[ $(/usr/bin/id -u) -eq 0 ]]; then
+    echo "This script CANNOT be run as root because homebrew does not allow it."
     usage
     exit
 fi
 
 ###################################################################
-# Determine which package system is being used
-# This helps determine which version of linux is being used
+# Using homebrew
 ###################################################################
-# Ubuntu
-if which apt-get &> /dev/null; then
-    DEPENDENCIES=("${DEPS_COMMON[@]}" "${DEPS_DPKG[@]}")
-    UBUNTU_VERSION=$(cat /etc/lsb-release | grep DISTRIB_RELEASE | cut -d '=' -f 2)
-    if [ "14.04" == ${UBUNTU_VERSION} ]; then
-        DEPENDENCIES+=(python-wxgtk2.8)
-    elif [ "16.04" == ${UBUNTU_VERSION} ]; then
-        DEPENDENCIES+=(python-wxgtk3.0)
-    fi
-    echo "This is Ubuntu. Using dpkg."
-
-    # OpenSuse, Mandriva, Fedora, CentOs, ecc. (with rpm)
-elif which rpm &> /dev/null; then
-    DEPENDENCIES=("${DEPS_COMMON[@]}" "${DEPS_RPM[@]}")
-    echo "This is Red Hat / CentOS. Using rpm."
-
-    # ArchLinux (with pacman)
-elif which pacman &> /dev/null; then
-    DEPENDENCIES=("${DEPS_COMMON[@]}" "${DEPS_PACMAN}")
-    echo "This is ArchLinux. Using pacman."
-elif [ $(uname) = "Darwin" ]; then
+if [ $(uname) = "Darwin" ]; then
     DEPENDENCIES=("${DEPS_COMMON[@]}" "${DEPS_BREW}")
     echo "This is macOS. Using homebrew."
 else
@@ -181,22 +157,10 @@ dep_len=${#DEPENDENCIES[@]}
 PKGSTOINSTALL=""
 for (( i=0; i < $dep_len; i++))
 do
-    if which apt-get &> /dev/null; then
-	    # some packages have a ':' so check for that too
-	    if [[ ! `dpkg -l | grep -w "ii  ${DEPENDENCIES[$i]} "` ]] &&
-	           [[ ! `dpkg -l | grep "ii  ${DEPENDENCIES[$i]}:"` ]]; then
-	        PKGSTOINSTALL=$PKGSTOINSTALL" "${DEPENDENCIES[$i]}
-	    fi
-	    # OpenSuse, Mandriva, Fedora, CentOs, ecc. (with rpm)
-    elif which rpm &> /dev/null; then
-	    if [[ `rpm -q ${DEPENDENCIES[$i]}` == "package "${DEPENDENCIES[$i]}" is not installed" ]]; then
-	        PKGSTOINSTALL=$PKGSTOINSTALL" "${DEPENDENCIES[$i]}
-	    fi
-	    # ArchLinux (with pacman)
-    elif which pacman &> /dev/null; then
-	    if [[ ! `pacman -Qqe | grep "${DEPENDENCIES[$i]}"` ]]; then
-	        PKGSTOINSTALL=$PKGSTOINSTALL" "${DEPENDENCIES[$i]}
-	    fi
+    if [ $(uname) = "Darwin" ]; then
+	    # FIXME
+      echo "Add homebrew package checking."
+	    PKGSTOINSTALL=$PKGSTOINSTALL" "${DEPENDENCIES[$i]}
     else
 	    # If it's impossible to determine if there are missing dependencies, mark all as missing
 	    PKGSTOINSTALL=$PKGSTOINSTALL" "${DEPENDENCIES[$i]}
@@ -215,30 +179,15 @@ if [ "$PKGSTOINSTALL" != "" ]; then
     SURE="Y"
     # If user want to install missing dependencies
     if [[ $SURE = "Y" || $SURE = "y" || $SURE = "" ]]; then
-        # Debian, Ubuntu and derivatives (with apt-get)
-	    if which apt-get &> /dev/null; then
-            apt-get update
-	        apt-get install -y $PKGSTOINSTALL
-	        # OpenSuse (with zypper)
-	    elif which zypper &> /dev/null; then
-	        zypper in $PKGSTOINSTALL
-	        # Mandriva (with urpmi)
-	    elif which urpmi &> /dev/null; then
-	        urpmi $PKGSTOINSTALL
-	        # Fedora and CentOS (with yum)
-	    elif which yum &> /dev/null; then
-	        echo "yum install $PKGSTOINSTALL"
-	        yum install $PKGSTOINSTALL
-	        # ArchLinux (with pacman)
-	    elif which pacman &> /dev/null; then
-	        pacman -Sy $PKGSTOINSTALL
-	        # Else, if no package manager has been found
-      elif [ $(uname) = "Darwin" ]; then
+	        # Homebrew
+      if [ $(uname) = "Darwin" ]; then
+          echo $PKGSTOINSTALL
           brew install $PKGSTOINSTALL
+	        # Else, if no package manager has been founded
 	    else
 	        # Set $NOPKGMANAGER
 	        NOPKGMANAGER=TRUE
-	        echo "ERROR: impossible to find a package manager in your system. Please install the following packages manually: ${DEPENDENCIES[*]}."
+	        echo "ERROR: impossible to found a package manager in your sistem. Please, install manually ${DEPENDENCIES[*]}."
 	    fi
 
         # Check if installation is successful
@@ -246,12 +195,12 @@ if [ "$PKGSTOINSTALL" != "" ]; then
 	        echo "All dependencies are satisfied."
         else
 	        # Else, if installation isn't successful
-	        echo "ERROR: impossible to install some missing dependencies. Please install the following packages manually: ${DEPENDENCIES[*]}."
+	        echo "ERROR: impossible to install some missing dependencies. Please, install manually ${DEPENDENCIES[*]}."
 	    fi
 
     else
 	    # Else, if user don't want to install missing dependencies
-	    echo "WARNING: Some dependencies may be missing. Please install the following packages manually: ${DEPENDENCIES[*]}."
+	    echo "WARNING: Some dependencies may be missing. So, please, install manually ${DEPENDENCIES[*]}."
     fi
 else
     echo "All dependencies are installed. No further action is required."

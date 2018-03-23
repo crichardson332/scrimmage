@@ -93,12 +93,21 @@ namespace sc = scrimmage;
 namespace scrimmage {
 
 double fps = 0;
+#ifdef __APPLE__
+void fpsCallbackFunction(vtkObject* caller, long unsigned int vtkNotUsed(eventId), // NOLINT
+                         void* clientData, void* callData) {
+    vtkRenderer* renderer = static_cast<vtkRenderer*>(caller);
+    double timeInSeconds = renderer->GetLastRenderTimeInSeconds();
+    fps = 1.0/timeInSeconds;
+}
+#else
 void fpsCallbackFunction(vtkObject* caller, long unsigned int vtkNotUsed(eventId), // NOLINT
                          void* vtkNotUsed(clientData), void* vtkNotUsed(callData)) {
     vtkRenderer* renderer = static_cast<vtkRenderer*>(caller);
     double timeInSeconds = renderer->GetLastRenderTimeInSeconds();
     fps = 1.0/timeInSeconds;
 }
+#endif
 
 Updater::Updater() :
         frame_time_(-1.0), update_count(0), inc_follow_(true),
@@ -139,8 +148,13 @@ void Updater::init(const std::string &log_dir, double dt) {
     dt_ = dt;
 }
 
+#ifdef __APPLE__
+void Updater::Execute(vtkObject *caller, unsigned long eventId, // NOLINT
+                      void * callData) {
+#else
 void Updater::Execute(vtkObject *caller, unsigned long vtkNotUsed(eventId), // NOLINT
                       void * vtkNotUsed(callData)) {
+#endif
     update();
 
     vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::SafeDownCast(caller);
