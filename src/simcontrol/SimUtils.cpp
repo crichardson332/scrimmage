@@ -45,6 +45,7 @@
 #include <scrimmage/simcontrol/SimControl.h>
 #include <scrimmage/simcontrol/SimUtils.h>
 
+#include <signal.h>
 #include <iostream>
 #include <iomanip>
 

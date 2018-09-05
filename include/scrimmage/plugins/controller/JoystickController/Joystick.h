@@ -29,6 +29,7 @@
  * A Long description goes here.
  *
  */
+#ifndef __APPLE__
 
 #ifndef INCLUDE_SCRIMMAGE_PLUGINS_CONTROLLER_JOYSTICKCONTROLLER_JOYSTICK_H_
 #define INCLUDE_SCRIMMAGE_PLUGINS_CONTROLLER_JOYSTICKCONTROLLER_JOYSTICK_H_
@@ -84,3 +85,5 @@ class Joystick {
 } // namespace controller
 } // namespace scrimmage
 #endif // INCLUDE_SCRIMMAGE_PLUGINS_CONTROLLER_JOYSTICKCONTROLLER_JOYSTICK_H_
+
+#endif // __APPLE__
