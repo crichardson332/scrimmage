@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://gtri.gatech.edu"?>
+<params>
+  <library>KeypadManual_plugin</library>
+  <initial_speed>24.3</initial_speed>
+
+  <pitch_to_pitch_rate_pid>2, 0, 0, 1</pitch_to_pitch_rate_pid>
+  <roll_to_roll_rate_pid>-2, 0, 0, 1</roll_to_roll_rate_pid>
+</params>

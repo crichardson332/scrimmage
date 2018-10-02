@@ -1307,6 +1307,14 @@ void Updater::toggle_helpmenu() {
     }
 }
 
+void Updater::send_kp_key(std::string key, bool key_release) {
+    gui_msg_.set_kp_key(key);
+    gui_msg_.set_key_release(key_release);
+    outgoing_interface_->send_gui_msg(gui_msg_);
+    gui_msg_.set_kp_key("");
+    gui_msg_.set_key_release(false);
+}
+
 void Updater::shutting_down() {
     gui_msg_.set_shutting_down(true);
     if (send_shutdown_msg_) {
