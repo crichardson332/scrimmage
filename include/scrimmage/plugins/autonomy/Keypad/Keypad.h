@@ -52,21 +52,7 @@ class Keypad : public scrimmage::Autonomy{
     bool step_autonomy(double t, double dt) override;
 
  protected:
-    double speed_;
-    std::shared_ptr<scrimmage::interaction::BoundaryBase> boundary_;
-
-    int desired_alt_idx_ = 0;
-    int desired_speed_idx_ = 0;
-    int desired_heading_idx_ = 0;
-
-    double desired_alt_;
-    double desired_speed_;
-    double desired_heading_;
-
     // params
-    double alt_increment_ = 0;
-    double speed_increment_ = 0;
-    double heading_increment_ = 0;
     double laser_speed_;
 
     // viz

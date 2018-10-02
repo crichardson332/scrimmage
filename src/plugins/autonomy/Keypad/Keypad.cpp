@@ -61,25 +61,12 @@ namespace scrimmage {
 namespace autonomy {
 
 void Keypad::init(std::map<std::string, std::string> &params) {
-    speed_ = scrimmage::get("speed", params, 0.0);
-    alt_increment_ = scrimmage::get("alt_increment", params, 1);
-    speed_increment_ = scrimmage::get("speed_increment", params, 1);
-    heading_increment_ = scrimmage::get("heading_increment", params, 0.02);
     laser_speed_ = scrimmage::get("laser_speed", params, 100);
 
     subscribe<std::string>("GlobalNetwork", "KeypadKeyPress",
       std::bind(&Keypad::callback_key_press, this, std::placeholders::_1));
     subscribe<std::string>("GlobalNetwork", "KeypadKeyRelease",
       std::bind(&Keypad::callback_key_release, this, std::placeholders::_1));
-
-    desired_alt_idx_ = vars_.declare(VariableIO::Type::desired_altitude, VariableIO::Direction::Out);
-    desired_speed_idx_ = vars_.declare(VariableIO::Type::desired_speed, VariableIO::Direction::Out);
-    desired_heading_idx_ = vars_.declare(VariableIO::Type::desired_heading, VariableIO::Direction::Out);
-
-    // initialize ctrl
-    desired_alt_ = state_->pos()[2];
-    desired_speed_ = state_->vel().norm();
-    desired_heading_ = state_->quat().yaw();
 
     // viz
     laser_ = std::make_shared<scrimmage_proto::Shape>();
@@ -93,32 +80,13 @@ void Keypad::init(std::map<std::string, std::string> &params) {
 
 bool Keypad::step_autonomy(double t, double dt) {
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Convert desired velocity to desired speed, heading, and pitch controls
-    ///////////////////////////////////////////////////////////////////////////
-    vars_.output(desired_alt_idx_, desired_alt_);
-    vars_.output(desired_speed_idx_, desired_speed_);
-    vars_.output(desired_heading_idx_, desired_heading_);
-
     update_lasers(dt);
 
     return true;
 }
 
 void Keypad::callback_key_press(scrimmage::MessagePtr<std::string> msg) {
-    if (msg->data == "KP_1") {
-      desired_speed_ -= speed_increment_;
-    } else if (msg->data == "KP_2") {
-      desired_speed_ += speed_increment_;
-    } else if (msg->data == "KP_4") {
-      desired_heading_ += heading_increment_;
-    } else if (msg->data == "KP_6") {
-      desired_heading_ -= heading_increment_;
-    } else if (msg->data == "KP_5") {
-      desired_alt_ -= alt_increment_;
-    } else if (msg->data == "KP_8") {
-      desired_alt_ += alt_increment_;
-    } else if (msg->data == "KP_7") {
+    if (msg->data == "KP_7") {
       Eigen::Vector3d dir = state_->quat().rotate(Eigen::Vector3d::UnitX());
       scrimmage::set(laser_->mutable_cone()->mutable_direction(), -dir);
       scrimmage::set(laser_->mutable_cone()->mutable_apex(), 2 * dir + state_->pos());

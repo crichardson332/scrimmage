@@ -34,6 +34,8 @@
 #define INCLUDE_SCRIMMAGE_PLUGINS_CONTROLLER_KEYPADMANUAL_KEYPADMANUAL_H_
 
 #include <scrimmage/motion/Controller.h>
+#include <scrimmage/common/VariableIO.h>
+#include <scrimmage/common/PID.h>
 
 #include <map>
 #include <string>
@@ -47,6 +49,26 @@ class KeypadManual : public scrimmage::Controller {
     bool step(double t, double dt) override;
 
  protected:
+    uint8_t pitch_rate_idx_ = 0;
+    uint8_t roll_rate_idx_ = 0;
+    uint8_t throttle_idx_ = 0;
+
+    double desired_roll_;
+    double desired_pitch_;
+    double throttle_;
+
+    // control
+    scrimmage::PID pitch_to_pitch_rate_pid_;
+    scrimmage::PID roll_to_roll_rate_pid_;
+
+    // params
+    double throttle_increment_;
+    double roll_limit_deg_;
+    double pitch_limit_deg_;
+
+    // callbacks
+    void callback_key_press(scrimmage::MessagePtr<std::string> msg);
+    void callback_key_release(scrimmage::MessagePtr<std::string> msg);
 };
 } // namespace controller
 } // namespace scrimmage

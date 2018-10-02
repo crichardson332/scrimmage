@@ -1018,7 +1018,11 @@ void SimControl::run_check_network_msgs() {
                 auto msg = std::make_shared<Message<std::string>>();
                 std::string key(it->kp_key());
                 msg->data = key;
-                pub_keypad_key_press_->publish(msg);
+                if (it->key_release()) {
+                  pub_keypad_key_release_->publish(msg);
+                } else {
+                  pub_keypad_key_press_->publish(msg);
+                }
             }
             control.erase(it++);
         }
