@@ -144,6 +144,8 @@ class Updater : public vtkCommand {
 
     void toggle_helpmenu();
 
+    void send_kp_key(std::string key, bool key_release);
+
     void toggle_pause();
 
     void single_step();

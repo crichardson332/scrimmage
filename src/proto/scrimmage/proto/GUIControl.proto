@@ -16,6 +16,8 @@ message GUIMsg {
         bool shutting_down = 6;
         bool request_cached = 7;
         string custom_key = 8;
+        string kp_key = 9;
+        bool key_release = 10;
 }
 
 message WorldPointClicked {

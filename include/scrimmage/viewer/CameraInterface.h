@@ -62,6 +62,7 @@ class CameraInterface : public vtkInteractorStyleTrackballCamera {
     // vtkTypeMacro(CameraInterface, vtkInteractorStyleTrackballCamera);
 
     virtual void OnKeyPress();
+    virtual void OnKeyRelease();
     virtual void OnLeftButtonDown();
     virtual void OnLeftButtonUp();
     virtual void Rotate();

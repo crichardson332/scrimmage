@@ -263,6 +263,8 @@ class SimControl {
     PublisherPtr pub_one_team_;
     PublisherPtr pub_world_point_clicked_;
     PublisherPtr pub_custom_key_;
+    PublisherPtr pub_keypad_key_press_;
+    PublisherPtr pub_keypad_key_release_;
 
     std::list<EntityPtr> not_ready_;
     DelayedTask screenshot_task_;

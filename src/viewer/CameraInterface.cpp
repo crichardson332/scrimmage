@@ -93,12 +93,29 @@ void CameraInterface::OnKeyPress() {
         updater_->toggle_helpmenu();
     } else if (key == "semicolon") {
       last_key_ = key;
+    } else if (key.substr(0, 2) == "KP") {
+        updater_->send_kp_key(key, false);
     } else {
         // cout << "key: " << key << endl;
     }
 
     // Forward events
     vtkInteractorStyleTrackballCamera::OnKeyPress();
+}
+
+void CameraInterface::OnKeyRelease() {
+    // Get the keypress
+    vtkRenderWindowInteractor *rwi = this->Interactor;
+    std::string key = rwi->GetKeySym();
+
+    if (key.substr(0, 2) == "KP") {
+        updater_->send_kp_key(key, true);
+    } else {
+        // cout << "key: " << key << endl;
+    }
+
+    // Forward events
+    vtkInteractorStyleTrackballCamera::OnKeyRelease();
 }
 
 void CameraInterface::Rotate() {
