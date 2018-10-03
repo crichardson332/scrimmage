@@ -13,7 +13,7 @@ The GUI responds to the following input keys:
    'A'                     : Rotate to a free movement camera view with pre-defined orientation
    'right/left arrows'     : Change the aircraft to follow
    '['                     : Decrease simulation warp speed
-   ']'                     : Increase simulation warp speed        
+   ']'                     : Increase simulation warp speed
    '+'                     : Increase visual scale of all entities
    '-'                     : Decrease visual scale of all entities
    'N'                     : Increase visual scale of entity numeric labels
@@ -25,8 +25,17 @@ The GUI responds to the following input keys:
    's'                     : Display solids (vs. wireframe)
    'CTRL + Left Click'     : Rotate world
    'SHIFT + Left Click'    : Translate camera through world
-   
-.. Note:: 
+   ';'                     : Enter custom key
+
+.. Note::
    If the terrain data is not fully displayed or if the entities do not appear,
    clicking on the SCRIMMAGE GUI will correct the problem. This is a small bug
    in VTK.
+
+- **custom key** : Used to control events in your simulation. Upon pressing the
+  ``;`` key, the simulator will wait for the next key press and publish it as
+  a string to a global topic called ``CustomKeyPress``. To utilize this
+  functionality, the user should create a scrimmage subscriber that subscribes
+  to this topic: ::
+
+   subscribe<std::string>("GlobalNetwork", "KeypadKeyPress", callback_function);
