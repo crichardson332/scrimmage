@@ -39,6 +39,8 @@
 #include <map>
 #include <string>
 
+#include <boost/circular_buffer.hpp>
+
 namespace scrimmage {
 
 namespace interaction {
@@ -57,7 +59,7 @@ class Keypad : public scrimmage::Autonomy{
 
     // viz
     scrimmage_proto::ShapePtr laser_;
-    std::vector<scrimmage_proto::ShapePtr> lasers_;
+    boost::circular_buffer<scrimmage_proto::ShapePtr> laser_ring_buffer_;
 
     void update_lasers(double dt);
 

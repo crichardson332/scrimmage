@@ -79,6 +79,8 @@ void KeypadManual::init(std::map<std::string, std::string> &params) {
       std::bind(&KeypadManual::callback_key_release, this, std::placeholders::_1));
 
     // init control
+    pitch_rate_idx_ = 0;
+    roll_rate_idx_ = 0;
     throttle_ = 0;
 }
 

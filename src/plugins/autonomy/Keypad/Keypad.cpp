@@ -68,14 +68,17 @@ void Keypad::init(std::map<std::string, std::string> &params) {
     subscribe<std::string>("GlobalNetwork", "KeypadKeyRelease",
       std::bind(&Keypad::callback_key_release, this, std::placeholders::_1));
 
-    // viz
+    // global properties for laser
     laser_ = std::make_shared<scrimmage_proto::Shape>();
     laser_->set_opacity(1);
     laser_->set_persistent(false);
     laser_->set_ttl(10);
     scrimmage::set(laser_->mutable_color(), 57, 255, 20);
-    laser_->mutable_cone()->set_height(2);
-    laser_->mutable_cone()->set_base_radius(0.2);
+    laser_->mutable_cone()->set_height(4);
+    laser_->mutable_cone()->set_base_radius(0.8);
+
+    // ring buffer
+    laser_ring_buffer_.set_capacity(20);
 }
 
 bool Keypad::step_autonomy(double t, double dt) {
@@ -90,7 +93,7 @@ void Keypad::callback_key_press(scrimmage::MessagePtr<std::string> msg) {
       Eigen::Vector3d dir = state_->quat().rotate(Eigen::Vector3d::UnitX());
       scrimmage::set(laser_->mutable_cone()->mutable_direction(), -dir);
       scrimmage::set(laser_->mutable_cone()->mutable_apex(), 2 * dir + state_->pos());
-      lasers_.push_back(laser_);
+      laser_ring_buffer_.push_back(laser_);
     }
 }
 
@@ -98,7 +101,7 @@ void Keypad::callback_key_release(scrimmage::MessagePtr<std::string> msg) {
 }
 
 void Keypad::update_lasers(double dt) {
-  for (auto&& laser : lasers_) {
+  for (auto&& laser : laser_ring_buffer_) {
     Eigen::Vector3d laser_apex, laser_direction, dir;
     laser_apex << laser->mutable_cone()->apex().x(),
                   laser->mutable_cone()->apex().y(),

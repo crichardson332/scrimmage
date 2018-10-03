@@ -36,6 +36,8 @@
 #include <scrimmage/motion/Controller.h>
 #include <scrimmage/common/VariableIO.h>
 #include <scrimmage/common/PID.h>
+#include <scrimmage/proto/Shape.pb.h>
+#include <scrimmage/proto/ProtoConversions.h>
 
 #include <map>
 #include <string>
@@ -47,6 +49,7 @@ class KeypadManual : public scrimmage::Controller {
  public:
     void init(std::map<std::string, std::string> &params) override;
     bool step(double t, double dt) override;
+
 
  protected:
     uint8_t pitch_rate_idx_ = 0;
