@@ -33,6 +33,7 @@
 #include <scrimmage/plugins/motion/JSBSimControl/JSBSimControl.h>
 
 #include <initialization/FGTrim.h>
+#include <simgear/misc/sg_path.hxx>
 
 #include <scrimmage/common/Utilities.h>
 #include <scrimmage/parse/ParseUtils.h>
@@ -115,15 +116,15 @@ bool JSBSimControl::init(std::map<std::string, std::string> &info,
     }
 
     exec_->SetDebugLevel(0);
-    exec_->SetRootDir(info["JSBSIM_ROOT"]);
-    exec_->SetAircraftPath("/aircraft");
-    exec_->SetEnginePath("/engine");
-    exec_->SetSystemsPath("/systems");
+    exec_->SetRootDir(SGPath(SGPath(info["JSBSIM_ROOT"])));
+    exec_->SetAircraftPath(SGPath("/aircraft"));
+    exec_->SetEnginePath(SGPath("/engine"));
+    exec_->SetSystemsPath(SGPath("/systems"));
 
-    exec_->LoadScript("/scripts/"+info["script_name"]);
+    exec_->LoadScript(SGPath("/scripts/"+info["script_name"]));
 
-    exec_->SetRootDir(parent_->mp()->log_dir());
-    exec_->SetRootDir(info["JSBSIM_ROOT"]);
+    exec_->SetRootDir(SGPath(SGPath(parent_->mp()->log_dir())));
+    exec_->SetRootDir(SGPath(SGPath(info["JSBSIM_ROOT"])));
 
     JSBSim::FGInitialCondition *ic = exec_->GetIC();
 
