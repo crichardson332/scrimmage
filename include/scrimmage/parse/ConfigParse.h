@@ -44,7 +44,7 @@ namespace rapidxml {
 template <class T> class xml_node;
 }}}}
 
-namespace rapidxml = boost::property_tree::detail::rapidxml;
+/* namespace rapidxml = boost::property_tree::detail::rapidxml; */
 
 namespace scrimmage {
 
@@ -69,7 +69,7 @@ class ConfigParse {
     std::vector<std::string> required_;
     std::string filename_;
 
-    void recursive_params(rapidxml::xml_node<char> *root,
+    void recursive_params(boost::property_tree::detail::rapidxml::xml_node<char> *root,
         std::map<std::string, std::string> &overrides,
         std::map<std::string, std::string> &params,
         const std::string &prev);

@@ -45,6 +45,9 @@
 #include <boost/algorithm/string.hpp>
 
 #include <boost/property_tree/detail/rapidxml.hpp>
+#include <thread>
+#include <chrono>
+using namespace std::chrono_literals;
 
 namespace fs = boost::filesystem;
 namespace rx = boost::property_tree::detail::rapidxml;
@@ -132,14 +135,24 @@ bool ConfigParse::parse(std::map<std::string, std::string> &overrides,
     if (config_node == 0) {
         cout << "Missing tag: params" << endl;
         return false;
+    } else {
+      std::cout << "config node name: " << config_node->name() << std::endl;
+      std::cout << "config node value: " << config_node->value() << std::endl;
+      /* std::cout << "config node attr name: " << config_node->first_attribute()->name() << std::endl; */
+      /* std::cout << "config node attr value: " << config_node->first_attribute()->value() << std::endl; */
+      std::cout << "config node first node name: " << config_node->first_node()->name() << std::endl;
+      std::cout << "config node first node value: " << config_node->first_node()->value() << std::endl;
     }
 
     params_.clear();
     params_["XML_DIR"] = this->directory() + "/";
     params_["XML_FILENAME"] = filename_;
+    cout << "DIR: " <<  params_["XML_DIR"] << endl;
+    cout << "FILENAME: " <<  params_["XML_FILENAME"] << endl;
+    std::cout << "--------" << std::endl;
+    std::this_thread::sleep_for(20s);
 
     recursive_params(config_node->first_node(), overrides, params_, "");
-
     // Determine if there were any overrides (XML attributes) specified in the
     // mission file that weren't declared in the Plugin's XML
     // file. Automatically add these overrides to the params block.
