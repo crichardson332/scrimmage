@@ -150,6 +150,11 @@ else()
   set(PROTOBUF_INCLUDE_DIRS "${PROTOBUF_INCLUDE}")
 endif()
 set(PROTOBUF_INCLUDE ${PROTOBUF_INCLUDE_DIRS})
+# create export target for protobuf
+add_library(scrimmage-protobuf INTERFACE)
+target_include_directories(scrimmage-protobuf INTERFACE ${PROTOBUF_INCLUDE})
+target_link_libraries(scrimmage-protobuf INTERFACE ${PROTOBUF_LIBS})
+install(TARGETS scrimmage-protobuf EXPORT ${PROJECT_NAME}-targets)
 
 ########################################################
 # Find GRPC
@@ -196,7 +201,7 @@ if (${VTK_FOUND})
         set(OPENGL_MODULE vtkRenderingOpenGL2)
     endif()
 
-    set(VTK_MODULES 
+    set(VTK_MODULES
         vtkFiltersSources
         vtkFiltersTexture
         vtkInteractionStyle
@@ -208,7 +213,7 @@ if (${VTK_FOUND})
         ${OPENGL_MODULE})
 
     find_package(VTK QUIET NO_MODULE COMPONENTS ${VTK_MODULES})
-endif() 
+endif()
 
 if (NOT EXTERNAL AND ${VTK_FOUND})
   message(STATUS "Found VTK Version: ${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}")
