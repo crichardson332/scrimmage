@@ -12,6 +12,7 @@ set(test_files
     test_simple.cpp
     test_state.cpp
     test_utilities.cpp
+    test_vector.cpp
     test_entity_configs.cpp
     test_openai.cpp
     )
