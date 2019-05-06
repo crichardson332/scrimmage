@@ -2066,9 +2066,35 @@ bool Updater::draw_polyline(const bool &new_shape,
                             vtkSmartPointer<vtkActor> &actor,
                             vtkSmartPointer<vtkPolyDataAlgorithm> &source,
                             vtkSmartPointer<vtkPolyDataMapper> &mapper) {
-    const auto ptr_field = pl.line();
-    for (auto it = ptr_field.begin(); it != ptr_field.end(); ++it) {
-      draw_line(new_shape, *it, actor, source, mapper);
+    if (new_shape) {
+        vtkSmartPointer<vtkPoints> points =
+            vtkSmartPointer<vtkPoints>::New();
+
+        for (int i = 0; i < p.point_size(); i++) {
+            points->InsertNextPoint(p.point(i).x(), p.point(i).y(),
+                                    p.point(i).z());
+        }
+
+        vtkSmartPointer<vtkPolyData> polyData =
+            vtkSmartPointer<vtkPolyData>::New();
+        polyData->SetPoints(points);
+
+        vtkSmartPointer<vtkVertexGlyphFilter> glyphFilter =
+            vtkSmartPointer<vtkVertexGlyphFilter>::New();
+
+#if VTK_MAJOR_VERSION < 6
+        glyphFilter->SetInput(polyData);
+#else
+        glyphFilter->SetInputData(polyData);
+#endif
+        glyphFilter->Update();
+
+        mapper->SetInputConnection(glyphFilter->GetOutputPort());
+        actor->SetMapper(mapper);
+        actor->GetProperty()->SetLineWidth(1);
+    }
+
+    for (auto it = pl.line().begin(); it != pl.line().end(); ++it) {
     }
     return true;
 }
