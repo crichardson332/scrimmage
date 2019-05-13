@@ -33,6 +33,7 @@
 #ifndef INCLUDE_SCRIMMAGE_COMMON_WAYPOINT_H_
 #define INCLUDE_SCRIMMAGE_COMMON_WAYPOINT_H_
 
+#include <Eigen/Dense>
 #include <scrimmage/math/Quaternion.h>
 
 #include <string>
@@ -61,6 +62,7 @@ class Waypoint {
     void set_latitude(const double& latitude) { latitude_ = latitude; }
     void set_longitude(const double& longitude) { longitude_ = longitude; }
     void set_altitude(const double& altitude) { altitude_ = altitude; }
+    void set_pos(const Eigen::Vector3d& pos) { pos_ = pos; }
     void set_quat(const scrimmage::Quaternion& quat) { quat_ = quat; }
     void set_position_tolerance(const double& pos_tol);
     void set_quat_tolerance(const double& quat_tol);
@@ -84,13 +86,15 @@ class Waypoint {
  protected:
     size_t id_ = 0;
     double time_ = 0.0;
-    double latitude_ = 0.0;
-    double longitude_ = 0.0;
-    double altitude_ = 0.0;
+    Eigen::Vector3d pos_;
     scrimmage::Quaternion quat_;
+    GeographicLib::LocalCartesian loc_cart_;
 
     double position_tolerance_ = 100.0;
     double quat_tolerance_ = 100.0;
+
+ public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 } // namespace autonomy
 } // namespace scrimmage

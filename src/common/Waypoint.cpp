@@ -40,17 +40,22 @@ namespace scrimmage {
 namespace autonomy {
 
 Waypoint::Waypoint(const double& latitude, const double& longitude,
-                   const double& altitude)
-    : latitude_(latitude), longitude_(longitude), altitude_(altitude) {}
+                   const double& altitude) {
+    double x, y, z;
+    loc_cart_.Forward(latitude, longitude, altitude, x, y, z);
+    pos_ << x, y, z;
+}
 
 Waypoint::Waypoint(const double &x, const double& y, const double& z,
                    const std::shared_ptr<GeographicLib::LocalCartesian> &proj) {
-    proj->Reverse(x, y, z, latitude_, longitude_, altitude_);
+    pos_ << x, y, z;
+    loc_cart_ = *proj;
 }
 
 Waypoint::Waypoint(const Eigen::Vector3d &xyz,
                    const std::shared_ptr<GeographicLib::LocalCartesian> &proj) {
-    proj->Reverse(xyz(0), xyz(1), xyz(2), latitude_, longitude_, altitude_);
+    pos_ = xyz;
+    loc_cart_ = *proj;
 }
 
 void Waypoint::set_position_tolerance(const double& pos_tol) {
