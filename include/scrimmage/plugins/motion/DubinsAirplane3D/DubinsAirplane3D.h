@@ -55,10 +55,13 @@ class DubinsAirplane3D : public scrimmage::MotionModel {
  protected:
     double speed_max_ = +std::numeric_limits<double>::infinity();
     double speed_min_ = -std::numeric_limits<double>::infinity();
+    double wind_x_ = 0.0;
+    double wind_y_ = 0.0;
 
     scrimmage::Quaternion quat_world_;
     scrimmage::Quaternion quat_world_inverse_;
     scrimmage::Quaternion quat_local_;
+    Eigen::Vector3d wind_world_;
 
     bool write_csv_;
     CSV csv_;

@@ -75,6 +75,8 @@ bool DubinsAirplane3D::init(std::map<std::string, std::string> &info,
     // Model limits
     speed_max_ = sc::get<double>("speed_max", params, speed_max_);
     speed_min_ = sc::get<double>("speed_min", params, speed_min_);
+    wind_x_ = sc::get<double>("wind_x", params, wind_x_);
+    wind_y_ = sc::get<double>("wind_y", params, wind_y_);
 
     // Directly set speed, pitch, and roll
     desired_speed_idx_ = vars_.declare(VariableIO::Type::desired_speed, VariableIO::Direction::In);
@@ -163,6 +165,12 @@ bool DubinsAirplane3D::step(double t, double dt) {
     x_[U] = speed_ + force_body(0) / mass_;
     x_[V] = force_body(1) / mass_;
     x_[W] = force_body(2) / mass_;
+
+    // wind
+    wind_world_ << wind_x_, wind_y_, 0;
+    const Eigen::Vector3d wind_body = quat_local_.rotate_reverse(wind_world_);
+    x_[U] += wind_body(0);
+    x_[V] += wind_body(1);
 
     double turn_rate = 0;
     if (std::abs(speed_) >= std::numeric_limits<double>::epsilon()) {
