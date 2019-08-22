@@ -56,6 +56,7 @@ target_link_libraries(${LIBRARY_NAME}
   PUBLIC
     scrimmage-protos
     scrimmage-msgs
+    scrimmage-vtk
     ${GeographicLib_LIBRARIES}
     ${CMAKE_DL_LIBS}
   PRIVATE

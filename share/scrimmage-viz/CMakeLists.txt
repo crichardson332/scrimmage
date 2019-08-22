@@ -17,7 +17,7 @@ endif()
 add_dependencies(${APP_NAME} scrimmage-protos)
 
 target_link_libraries(${APP_NAME}
-  ${VTK_LIBRARIES}
+  scrimmage-vtk
   scrimmage-core
   scrimmage-viewer
   scrimmage-protos

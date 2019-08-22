@@ -187,7 +187,6 @@ endif()
 ########################################################
 # Find VTK
 ########################################################
-
 find_package(VTK QUIET NO_MODULE)
 if (${VTK_FOUND})
     if (${VTK_MAJOR_VERSION} LESS 7)
@@ -212,14 +211,14 @@ endif()
 
 if (${VTK_FOUND})
   message(STATUS "Found VTK Version: ${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}")
-  include_directories(SYSTEM ${VTK_INCLUDE_DIRS})
-  include(${VTK_USE_FILE})
-  add_definitions(-DENABLE_VTK=1)
-
   add_library(scrimmage-vtk INTERFACE)
   target_include_directories(scrimmage-vtk INTERFACE ${VTK_INCLUDE_DIRS})
-  target_compile_definitions(scrimmage-vtk INTERFACE -DENABLE_VTK=1)
   target_link_libraries(scrimmage-vtk INTERFACE ${VTK_LIBRARIES})
+  target_compile_definitions(scrimmage-vtk INTERFACE -DENABLE_VTK=1)
+  target_compile_options(scrimmage-vtk
+    INTERFACE
+      -Wno-comment
+  )
   install(TARGETS scrimmage-vtk EXPORT ${PROJECT_NAME}-targets)
 else()
   add_definitions(-DENABLE_VTK=0)
