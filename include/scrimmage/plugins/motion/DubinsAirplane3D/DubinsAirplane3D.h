@@ -55,6 +55,8 @@ class DubinsAirplane3D : public scrimmage::MotionModel {
  protected:
     double speed_max_ = +std::numeric_limits<double>::infinity();
     double speed_min_ = -std::numeric_limits<double>::infinity();
+    double wind_speed_ = 0;
+    double wind_direction_ = 0;
 
     scrimmage::Quaternion quat_world_;
     scrimmage::Quaternion quat_world_inverse_;

@@ -36,6 +36,7 @@
 #include <scrimmage/parse/MissionParse.h>
 #include <scrimmage/plugin_manager/RegisterPlugin.h>
 #include <scrimmage/entity/Entity.h>
+#include <scrimmage/math/Angles.h>
 #include <scrimmage/math/State.h>
 #include <boost/algorithm/clamp.hpp>
 
@@ -75,6 +76,10 @@ bool DubinsAirplane3D::init(std::map<std::string, std::string> &info,
     // Model limits
     speed_max_ = sc::get<double>("speed_max", params, speed_max_);
     speed_min_ = sc::get<double>("speed_min", params, speed_min_);
+
+    // Extra params
+    wind_speed_ = sc::get<double>("wind_speed", params, wind_speed_);
+    wind_direction_ = sc::Angles::deg2rad(sc::get<double>("wind_direction_deg", params, wind_direction_));
 
     // Directly set speed, pitch, and roll
     desired_speed_idx_ = vars_.declare(VariableIO::Type::desired_speed, VariableIO::Direction::In);
@@ -250,8 +255,8 @@ void DubinsAirplane3D::model(const vector_t &x , vector_t &dxdt , double t) {
 
     Eigen::Vector3d vel_local(x[U], x[V], x[W]);
     Eigen::Vector3d vel_world = rot * vel_local;
-    dxdt[Xw] = vel_world(0);
-    dxdt[Yw] = vel_world(1);
+    dxdt[Xw] = vel_world(0) + wind_speed_ * std::cos(wind_direction_);
+    dxdt[Yw] = vel_world(1) + wind_speed_ * std::sin(wind_direction_);
     dxdt[Zw] = vel_world(2);
 }
 } // namespace motion
