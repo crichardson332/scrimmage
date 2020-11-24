@@ -61,7 +61,8 @@ function callbackVehicle(data) {
     key = 'default';
   }
   entity.model = model_map[key];
-  entity.model.rotation = model_map[key].rotation;
+  const jq = model_map[key].rotation;
+  entity.model.rotation = new Cesium.Quaternion(jq.x, jq.y, jq.z, jq.w);
   if (entity.model.rotation === undefined) {
     entity.model.rotation = new Cesium.Quaternion(0, 0, 0, 1);
   }

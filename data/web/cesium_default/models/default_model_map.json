@@ -1,0 +1,14 @@
+{
+  "default": {
+    "uri": "./models/CesiumAir/Cesium_Air.gltf",
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "runAnimations": true,
+    "minimumPixelSize": 64,
+    "maximumScale": 20000
+  }
+}
